@@ -1,5 +1,16 @@
 # Inkwell
 
-Workshop 1 scaffold for the Inkwell semester project.
+A Medium-like blog publishing platform built for CS 415/515: Software Design and Development.
 
-This repository contains a minimal React frontend and Express backend for the initial course assignment.
+## Definition of Done
+
+A backlog item is Done when:
+- [ ] Code is committed with a descriptive message
+- [ ] It runs locally per the relevant lecture's Code Walkthrough
+- [ ] It does not break previously-passing verification steps
+- [ ] New setup steps are documented here
+
+## Process
+
+Inkwell follows an incremental process: one lecture, one increment.
+See docs/BACKLOG.md for the current product backlog.
