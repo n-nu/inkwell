@@ -1,14 +1,11 @@
 import express from 'express';
+import healthRoutes from './routes/health.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    service: 'inkwell-api',
-  });
-});
+app.use(express.json());
+app.use('/api', healthRoutes);
 
 app.get('/api/version', (req, res) => {
   res.status(200).json({
