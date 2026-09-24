@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Inkwell icon">
+  <rect width="128" height="128" rx="24" fill="#1f2937"/>
+  <path d="M30 90V38c0-8.8 7.2-16 16-16h36c8.8 0 16 7.2 16 16v52c0 6.6-5.4 12-12 12H42c-6.6 0-12-5.4-12-12Z" fill="#f5f3ff"/>
+  <path d="M42 50h44v8H42zm0 16h44v8H42zm0 16h28v8H42z" fill="#4f46e5"/>
+  <path d="M78 28c9 0 16 7 16 16v12H62V44c0-9 7-16 16-16Z" fill="#c7d2fe" opacity="0.95"/>
+  <circle cx="94" cy="34" r="10" fill="#fbbf24"/>
+</svg>

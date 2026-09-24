@@ -7,6 +7,12 @@ export class UserRepository {
     });
   }
 
+  async findById(id) {
+    return prisma.user.findUnique({
+      where: { id },
+    });
+  }
+
   async create({ email, displayName, passwordHash }) {
     return prisma.user.create({
       data: { email, displayName, passwordHash },

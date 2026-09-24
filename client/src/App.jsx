@@ -7,9 +7,9 @@ import PostEditor from './components/PostEditor.jsx';
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-stone-50 text-stone-900">
+      <div className="min-h-screen bg-stone-50 text-stone-900 antialiased">
         <NavBar />
-        <main className="mx-auto max-w-4xl px-6 py-10">
+        <main className="w-full px-4 py-6 md:mx-auto md:max-w-2xl md:px-6 md:py-8 lg:max-w-3xl">
           <Routes>
             <Route path="/" element={<Feed />} />
             <Route path="/write" element={<PostEditor />} />

@@ -1,8 +1,12 @@
 import express from 'express';
 import PostService from '../services/post.service.js';
+import TokenService from '../services/token.service.js';
+import UserRepository from '../repositories/user.repository.js';
 
 const router = express.Router();
 const postService = new PostService();
+const tokenService = new TokenService();
+const userRepository = new UserRepository();
 
 function sendError(res, error) {
   if (error.name === 'ValidationError') {
@@ -11,9 +15,41 @@ function sendError(res, error) {
   return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' } });
 }
 
-router.post('/posts', async (req, res) => {
+async function requireAuth(req, res, next) {
+  const authHeader = req.headers.authorization || '';
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+
+  if (!match) {
+    return res.status(401).json({
+      error: { code: 'MISSING_AUTHORIZATION', message: 'Authorization header is required.' },
+    });
+  }
+
   try {
-    const post = await postService.publish(req.body);
+    const payload = tokenService.verifyAccessToken(match[1]);
+    const user = await userRepository.findById(payload.sub);
+
+    if (!user) {
+      return res.status(401).json({
+        error: { code: 'INVALID_TOKEN', message: 'Session user no longer exists.' },
+      });
+    }
+
+    req.user = { id: user.id, email: user.email };
+    return next();
+  } catch {
+    return res.status(401).json({
+      error: { code: 'INVALID_TOKEN', message: 'Invalid or expired access token.' },
+    });
+  }
+}
+
+router.post('/posts', requireAuth, async (req, res) => {
+  try {
+    const post = await postService.publish({
+      ...req.body,
+      authorId: req.user.id,
+    });
     return res.status(201).json(post);
   } catch (error) {
     return sendError(res, error);

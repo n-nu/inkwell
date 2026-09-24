@@ -57,13 +57,36 @@ function PostEditor({ authorId, onPublished }) {
   const isPublishing = workflowState === 'publishing';
 
   return (
-    <form onSubmit={(event) => { event.preventDefault(); handlePublish(); }}>
-      <label htmlFor="post-title">Title</label>
-      <input id="post-title" value={title} onChange={handleTitleChange} aria-describedby={errorMessage ? 'post-error' : undefined} />
-      <label htmlFor="post-body">Body</label>
-      <textarea id="post-body" value={body} onChange={handleBodyChange} aria-describedby={errorMessage ? 'post-error' : undefined} />
-      {errorMessage && <p id="post-error" role="alert">{errorMessage}</p>}
-      <button type="submit" disabled={isPublishing}>
+    <form className="w-full space-y-4" onSubmit={(event) => { event.preventDefault(); handlePublish(); }}>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-stone-800" htmlFor="post-title">Title</label>
+        <input
+          id="post-title"
+          className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-base outline-none transition focus:border-stone-500"
+          value={title}
+          onChange={handleTitleChange}
+          aria-describedby={errorMessage ? 'post-error' : undefined}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-stone-800" htmlFor="post-body">Body</label>
+        <textarea
+          id="post-body"
+          className="min-h-[180px] w-full resize-y rounded-md border border-stone-300 bg-white px-3 py-2 text-base outline-none transition focus:border-stone-500"
+          value={body}
+          onChange={handleBodyChange}
+          aria-describedby={errorMessage ? 'post-error' : undefined}
+        />
+      </div>
+
+      {errorMessage && <p id="post-error" role="alert" className="text-sm text-red-700">{errorMessage}</p>}
+
+      <button
+        type="submit"
+        disabled={isPublishing}
+        className="w-full min-h-[44px] rounded-md bg-indigo-600 px-4 py-2 text-base font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
+      >
         {isPublishing ? 'Publishing...' : 'Publish'}
       </button>
     </form>

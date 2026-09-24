@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
+  overflow-x: hidden;
   font-family: Georgia, 'Times New Roman', serif;
+}
+
+img {
+  display: block;
+  max-width: 100%;
 }
 
 button,

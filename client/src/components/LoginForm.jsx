@@ -41,14 +41,14 @@ function LoginForm() {
       <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
         <div>
           <label className="mb-2 block font-medium" htmlFor="login-email">Email</label>
-          <input className="w-full border border-stone-300 bg-white px-3 py-2" id="login-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} aria-describedby={errorMessage ? 'login-error' : undefined} required />
+          <input className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-base" id="login-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} aria-describedby={errorMessage ? 'login-error' : undefined} required />
         </div>
         <div>
           <label className="mb-2 block font-medium" htmlFor="login-password">Password</label>
-          <input className="w-full border border-stone-300 bg-white px-3 py-2" id="login-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} aria-describedby={errorMessage ? 'login-error' : undefined} required />
+          <input className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-base" id="login-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} aria-describedby={errorMessage ? 'login-error' : undefined} required />
         </div>
         {errorMessage && <p id="login-error" role="alert" className="text-red-700">{errorMessage}</p>}
-        <button className="bg-stone-900 px-5 py-2 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={isSubmitting}>
+        <button className="w-full min-h-[44px] rounded-md bg-stone-900 px-5 py-2 font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto" type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Logging in...' : 'Log In'}
         </button>
       </form>
