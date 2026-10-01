@@ -2,6 +2,7 @@ import express from 'express';
 import PostService from '../services/post.service.js';
 import TokenService from '../services/token.service.js';
 import UserRepository from '../repositories/user.repository.js';
+import { getPublishedPostCount } from '../events/listeners/published-post-stats.listener.js';
 
 const router = express.Router();
 const postService = new PostService();
@@ -65,11 +66,22 @@ router.get('/posts', async (req, res) => {
   }
 
   try {
+    const searchQuery = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+
+    if (searchQuery) {
+      const result = await postService.search({ query: searchQuery, page });
+      return res.status(200).json(result);
+    }
+
     const result = await postService.listPublished({ page });
     return res.status(200).json(result);
   } catch (error) {
     return sendError(res, error);
   }
+});
+
+router.get('/stats', (_req, res) => {
+  res.status(200).json({ totalPostsPublished: getPublishedPostCount() });
 });
 
 export default router;

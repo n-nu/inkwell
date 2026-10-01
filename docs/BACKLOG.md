@@ -11,10 +11,10 @@ Definition of Done: see README.md
 | US-05 | As a reader, I want to comment on a post, so that I can engage with the author | Medium | 3 | Backlog |
 | US-06 | As a reader, I want to follow an author, so that I see their new posts more prominently | Medium | 3 | Backlog |
 | US-07 | As an author, I want to see basic analytics on my posts, so that I understand my audience | Low | 5 | Backlog |
-| US-08 | As a user, I want to reset my password, so that I can regain access if I forget it | High | 3 | Backlog | See docs/requirements/use-cases.md |
-| US-09 | As an author, I want to edit my published posts, so that I can fix errors or update content after publishing | Medium | 3 | Backlog | See docs/requirements/use-cases.md |
+| US-08 | As an author, I want to tag my post with one or more topics, so that readers can discover it by subject. | High | 3 | Backlog |
+| US-09 | As a reader, I want to search posts by keyword or tag, so that I can find content relevant to me. | High | 3 | Backlog |
 
 ## Estimation Justifications
 
-- **US-08:** Password reset is High priority because losing account access prevents users from using the platform, and 3 points reflects a focused recovery workflow involving reset-token handling.
-- **US-09:** Published-post editing is Medium priority because it improves author experience but is less essential than registration, login, publishing, and feed access, and 3 points reflects a contained post-update feature.
+- **US-08:** Tagging is a focused content-discovery improvement that increases searchable context without requiring large UI or database changes, and 3 points reflects the creation of the many-to-many tag model plus post publication updates.
+- **US-09:** Keyword search is important for discovery and is intentionally limited to the documented Workshop 9 strategy, making the feature small but still valuable to readers.

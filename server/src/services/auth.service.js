@@ -3,6 +3,9 @@ import UserRepository from '../repositories/user.repository.js';
 import { assertNonEmpty } from '../utils/validation.js';
 import TokenService from './token.service.js';
 
+const BCRYPT_COST_FACTOR = 10;
+const MIN_PASSWORD_LENGTH = 8;
+
 export class EmailAlreadyRegisteredError extends Error {
   constructor() {
     super('This email is already registered.');
@@ -53,11 +56,11 @@ export class AuthService {
       throw new EmailAlreadyRegisteredError();
     }
 
-    if (password.length < 8) {
+    if (password.length < MIN_PASSWORD_LENGTH) {
       throw new WeakPasswordError();
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, BCRYPT_COST_FACTOR);
     let user;
     try {
       user = await this.userRepository.create({

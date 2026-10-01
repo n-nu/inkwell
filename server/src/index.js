@@ -1,5 +1,7 @@
 import express from 'express';
 import 'dotenv/config';
+import './events/listeners/log-published-posts.listener.js';
+import './events/listeners/published-post-stats.listener.js';
 import healthRoutes from './routes/health.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import postRoutes from './routes/post.routes.js';
