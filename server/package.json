@@ -5,7 +5,8 @@
   "description": "Inkwell API server",
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file=.env src/index.js"
+    "dev": "node --watch --env-file=.env src/index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -18,5 +19,8 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "prisma": "^7.10.0"
+  },
+  "devDependencies": {
+    "jest": "^30.5.2"
   }
 }

@@ -14,13 +14,13 @@ The project follows the review process established in Workshop 10. The author pe
 
 ## Testing
 
-The project currently uses incremental, manual verification; comprehensive systematic test coverage is not yet established. The planned testing progression is:
+The project uses incremental manual verification alongside isolated service unit tests; comprehensive systematic test coverage is not yet established. The testing progression is:
 
-- Unit tests for Services and Repositories — Lecture 12
-- Integration tests for Routes — Lecture 13
-- End-to-end tests for critical user flows — Lecture 14
+- Unit tests: Services and Repositories (Jest) — ACTIVE as of Lecture 12. Current coverage tests `AuthService.register()`, `PostService.publish()`, and `PostService.search()` with repository, token, event, and search-strategy test doubles; repository unit tests remain future work.
+- Integration tests: Routes (Supertest) — planned starting Lecture 13
+- End-to-end tests: critical user flows (Playwright) — planned starting Lecture 14
 
-These are planned practices, not claims about tests that already exist.
+Run `npm test` from `server/`. See the [Lecture 12 search test cases](LECTURE-12-SEARCH-TEST-CASES.md) for the search test design. Integration and end-to-end coverage are not active yet.
 
 ## Defect Tracking
 

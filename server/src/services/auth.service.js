@@ -3,6 +3,8 @@ import UserRepository from '../repositories/user.repository.js';
 import { assertNonEmpty } from '../utils/validation.js';
 import TokenService from './token.service.js';
 
+export { ValidationError } from '../utils/validation.js';
+
 const BCRYPT_COST_FACTOR = 10;
 const MIN_PASSWORD_LENGTH = 8;
 
