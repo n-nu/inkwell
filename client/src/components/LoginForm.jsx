@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { saveToken } from '../lib/auth.js';
+import { saveToken, saveUser } from '../lib/auth.js';
 
 function LoginForm() {
   const navigate = useNavigate();
@@ -28,6 +28,7 @@ function LoginForm() {
         return;
       }
       saveToken(result.accessToken);
+      saveUser(result.user);
       navigate('/');
     } catch {
       setErrorMessage('Something went wrong. Please try again.');
@@ -37,7 +38,7 @@ function LoginForm() {
 
   return (
     <section className="mx-auto max-w-md">
-      <h1 className="font-serif text-4xl font-semibold">Log in</h1>
+      <h1 className="font-serif text-4xl font-semibold">Log In</h1>
       <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
         <div>
           <label className="mb-2 block font-medium" htmlFor="login-email">Email</label>
