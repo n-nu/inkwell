@@ -14,13 +14,14 @@ The project follows the review process established in Workshop 10. The author pe
 
 ## Testing
 
-The project uses incremental manual verification alongside isolated service unit tests; comprehensive systematic test coverage is not yet established. The testing progression is:
+The project uses incremental automated verification; comprehensive end-to-end coverage is not yet established.
 
-- Unit tests: Services and Repositories (Jest) — ACTIVE as of Lecture 12. Current coverage tests `AuthService.register()`, `PostService.publish()`, and `PostService.search()` with repository, token, event, and search-strategy test doubles; repository unit tests remain future work.
-- Integration tests: Routes (Supertest) — planned starting Lecture 13
-- End-to-end tests: critical user flows (Playwright) — planned starting Lecture 14
+- Unit tests: Services and Repositories (Jest) — ACTIVE (Lecture 12). Current coverage tests `AuthService.register()`, `PostService.publish()`, and `PostService.search()` with repository, token, event, and search-strategy test doubles; repository unit tests remain future work.
+- Integration tests: Routes → Services → Repositories, real isolated PostgreSQL test DB (Supertest) — ACTIVE (Lecture 13). Covers registration, publishing/browsing, duplicate registration, and registration/login.
+- Component tests: React components (React Testing Library + Vitest) — ACTIVE (Lecture 13). Covers failed post publishing in `PostEditor`.
+- End-to-end tests: critical user flows (Playwright) — planned starting Lecture 14.
 
-Run `npm test` from `server/`. See the [Lecture 12 search test cases](LECTURE-12-SEARCH-TEST-CASES.md) for the search test design. Integration and end-to-end coverage are not active yet.
+Run `npm test` from `server/`; it loads `server/.env.test` and requires the isolated `inkwell_test` database with migrations applied. The reset fixture refuses to delete records unless `DATABASE_URL` names `inkwell_test`. Run `npx vitest run` from `client/` for component tests. See the [Lecture 12 search test cases](LECTURE-12-SEARCH-TEST-CASES.md) for the search test design.
 
 ## Defect Tracking
 
