@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../db/client.js';
+import TokenService from '../services/token.service.js';
 
 let userCounter = 0;
 
@@ -19,6 +20,25 @@ export async function createTestUser({
       isVerified: true,
     },
   });
+}
+
+export async function createTestPost(
+  user,
+  { title = 'Test post', body = 'A valid published test post.', publishedAt = new Date() } = {},
+) {
+  return prisma.post.create({
+    data: {
+      authorId: user.id,
+      title,
+      body,
+      status: 'PUBLISHED',
+      publishedAt,
+    },
+  });
+}
+
+export function tokenFor(user) {
+  return new TokenService().issueTokens(user).accessToken;
 }
 
 export async function resetDatabase() {

@@ -143,7 +143,7 @@ describe('HTTP integration', () => {
 
     const expiredToken = jwt.sign(
       { sub: alice.body.user.id },
-      process.env.ACCESS_TOKEN_SECRET || 'development-access-secret',
+      process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: -1 },
     );
     const expired = await request(app)

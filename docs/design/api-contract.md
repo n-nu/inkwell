@@ -158,6 +158,23 @@ Errors:
 | 400 | `INVALID_PAGE` | `Page must be a positive integer.` |
 | 400 | `INVALID_PAGE_SIZE` | `Page size must be a positive integer.` |
 
+## DELETE /api/posts/:id
+
+Deletes a post owned by the authenticated user.
+
+Authentication: required. The server compares the post author with the user
+identified by the verified access token; a client-supplied owner ID is ignored.
+
+Success: `204 No Content`
+
+Errors:
+
+| Status | Code | Meaning |
+|---|---|---|
+| 401 | `UNAUTHENTICATED` | A valid bearer access token is required. |
+| 403 | `FORBIDDEN` | The authenticated user does not own the post. |
+| 404 | `NOT_FOUND` | The post does not exist. |
+
 ## POST /api/posts/:id/comments
 
 Creates a comment on a published post. This endpoint is documented now as requested by Workshop 4 and is implemented in the later US-05 increment.

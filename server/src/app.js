@@ -4,6 +4,7 @@ import './events/listeners/published-post-stats.listener.js';
 import healthRoutes from './routes/health.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import postRoutes from './routes/post.routes.js';
+import { errorHandler } from './middleware/error-handler.js';
 
 export const app = express();
 
@@ -17,3 +18,5 @@ app.get('/api/version', (_req, res) => {
     version: '0.1.0',
   });
 });
+
+app.use(errorHandler);

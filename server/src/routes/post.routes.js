@@ -8,14 +8,7 @@ const postService = new PostService();
 const DEFAULT_PAGE_SIZE = 10;
 export const MAX_PAGE_SIZE = 100;
 
-function sendError(res, error) {
-  if (error.name === 'ValidationError') {
-    return res.status(400).json({ error: { code: error.code, message: error.message } });
-  }
-  return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' } });
-}
-
-router.post('/posts', requireAuth, async (req, res) => {
+router.post('/posts', requireAuth, async (req, res, next) => {
   try {
     const post = await postService.publish({
       ...req.body,
@@ -23,7 +16,25 @@ router.post('/posts', requireAuth, async (req, res) => {
     });
     return res.status(201).json(post);
   } catch (error) {
-    return sendError(res, error);
+    return next(error);
+  }
+});
+
+router.delete('/posts/:id', requireAuth, async (req, res, next) => {
+  try {
+    const post = await postService.getById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ error: { code: 'NOT_FOUND' } });
+    }
+
+    if (post.authorId !== req.user.id) {
+      return res.status(403).json({ error: { code: 'FORBIDDEN' } });
+    }
+
+    await postService.delete(req.params.id);
+    return res.status(204).end();
+  } catch (error) {
+    return next(error);
   }
 });
 
@@ -73,7 +84,7 @@ router.get('/posts', async (req, res) => {
     const result = await postService.listPublished({ page, pageSize });
     return res.status(200).json(result);
   } catch (error) {
-    return sendError(res, error);
+    return next(error);
   }
 });
 

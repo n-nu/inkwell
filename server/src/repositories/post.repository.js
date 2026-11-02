@@ -1,6 +1,18 @@
 import { prisma } from '../db/client.js';
 
 export class PostRepository {
+  async findById(id) {
+    return prisma.post.findUnique({
+      where: { id },
+    });
+  }
+
+  async deleteById(id) {
+    return prisma.post.delete({
+      where: { id },
+    });
+  }
+
   async create({ authorId, title, body, status, publishedAt }) {
     return prisma.post.create({
       data: { authorId, title, body, status, publishedAt },

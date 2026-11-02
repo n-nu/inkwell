@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import UserRepository from '../repositories/user.repository.js';
 import { assertNonEmpty } from '../utils/validation.js';
 import TokenService from './token.service.js';
+import { logger } from '../lib/logger.js';
 
 export { ValidationError } from '../utils/validation.js';
 
@@ -84,10 +85,16 @@ export class AuthService {
   }
 
   async login({ email, password }) {
-    const user = await this.userRepository.findByEmail(
-      typeof email === 'string' ? email.trim().toLowerCase() : email,
-    );
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : email;
+    const user = await this.userRepository.findByEmail(normalizedEmail);
     if (!user || typeof password !== 'string' || !(await bcrypt.compare(password, user.passwordHash))) {
+      logger.warn(
+        {
+          event: 'auth.login.failed',
+          ...(typeof normalizedEmail === 'string' ? { email: normalizedEmail } : {}),
+        },
+        'Failed login attempt',
+      );
       throw new InvalidCredentialsError();
     }
 

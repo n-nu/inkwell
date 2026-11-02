@@ -47,9 +47,11 @@ Copy-Item .env.example .env
 
 Set `DATABASE_URL` in `.env` to the PostgreSQL development database. The example uses
 `postgresql://inkwell:inkwell@localhost:5432/inkwell_dev?schema=public`.
-`ACCESS_TOKEN_SECRET` and `REFRESH_TOKEN_SECRET` may be set for local use;
-the server otherwise uses development-only defaults. Do not use those defaults
-outside local development.
+Replace both JWT secret placeholders with different random values of at least
+32 bytes. For example, run
+`node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"`
+twice and use one value for each secret. The server refuses to start if either
+secret is missing, too short, or equal to the other.
 
 Apply the Prisma migrations and start the API:
 
@@ -82,6 +84,10 @@ The integration tests require a separate PostgreSQL database named
 `inkwell_test` and an ignored `server/.env.test` file. Copy `.env.example` to
 `.env.test` with `Copy-Item .env.example .env.test`, change only the database
 name in `DATABASE_URL` to `inkwell_test`, and create the database:
+
+Set different test-only `ACCESS_TOKEN_SECRET` and `REFRESH_TOKEN_SECRET` values
+in `.env.test`, each at least 32 bytes. Never copy production secrets into a
+local test file.
 
 ```powershell
 Copy-Item .env.example .env.test

@@ -48,6 +48,14 @@ export class PostService {
     return post;
   }
 
+  async getById(id) {
+    return this.postRepository.findById(id);
+  }
+
+  async delete(id) {
+    return this.postRepository.deleteById(id);
+  }
+
   async listPublished({ page = 1, pageSize = 10 } = {}) {
     const result = await this.postRepository.findPublished({ page, pageSize });
     return { ...shapePostAuthors(result), page };

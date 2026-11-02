@@ -1,7 +1,18 @@
 import jwt from 'jsonwebtoken';
 
-const accessSecret = process.env.ACCESS_TOKEN_SECRET || 'development-access-secret';
-const refreshSecret = process.env.REFRESH_TOKEN_SECRET || 'development-refresh-secret';
+function requireSecret(name) {
+  const secret = process.env[name];
+  if (!secret || Buffer.byteLength(secret, 'utf8') < 32) {
+    throw new Error(`${name} must be configured with at least 32 bytes.`);
+  }
+  return secret;
+}
+
+const accessSecret = requireSecret('ACCESS_TOKEN_SECRET');
+const refreshSecret = requireSecret('REFRESH_TOKEN_SECRET');
+if (accessSecret === refreshSecret) {
+  throw new Error('ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET must be different.');
+}
 
 export class TokenService {
   issueTokens(user) {

@@ -17,13 +17,13 @@ The project follows the review process established in Workshop 10. The author pe
 The project uses incremental automated verification across the service, client,
 critical user flows, and setup documentation.
 
-- Unit tests: Services and Repositories (Jest) — ACTIVE (Lecture 12). Current coverage tests `AuthService.register()`, `PostService.publish()`, and `PostService.search()` with repository, token, event, and search-strategy test doubles; repository unit tests remain future work.
-- Integration tests: Routes → Services → Repositories, real isolated PostgreSQL test DB (Supertest) — ACTIVE (Lecture 13). Covers registration, publishing/browsing, duplicate registration, and registration/login.
+- Unit tests: Services and Repositories (Jest) — ACTIVE (Lecture 12). Current coverage tests `AuthService.register()` and failed-login logging, plus `PostService.publish()` and `PostService.search()` with repository, token, event, and search-strategy test doubles; repository unit tests remain future work.
+- Integration tests: Routes → Services → Repositories, real isolated PostgreSQL test DB (Supertest) — ACTIVE (Lecture 13). Covers registration, publishing/browsing, duplicate registration, registration/login, and post-delete ownership/cascade behavior.
 - Component tests: React components (React Testing Library + Vitest) — ACTIVE (Lecture 13). Covers failed post publishing in `PostEditor`.
 - End-to-end tests: critical user flows at mobile, tablet, and desktop viewports (Playwright) — ACTIVE (Lecture 14).
 - Automated accessibility checks (axe-core) — ACTIVE (Lecture 14); automated results supplement, but do not replace, manual accessibility review.
 - Documentation verification (README setup and test instructions) — ACTIVE (Lecture 14).
-- Security testing — ACTIVE (Lecture 15): STRIDE threat model, authentication and identity checks, response shaping, rate limiting, stored-XSS regression, and bounded pagination.
+- Security testing — ACTIVE (Lecture 15): STRIDE threat model, OWASP Top 10 review, authentication and identity checks, response shaping, rate limiting, stored-XSS regression, bounded pagination, ownership authorization, secret configuration, error-response sanitization, and security-event logging.
 - Performance/load testing — deferred; revisit at Lecture 19–20.
 
 Run `npm test` from `server/`; it loads `server/.env.test` and requires the isolated `inkwell_test` database with migrations applied. The reset fixture refuses to delete records unless `DATABASE_URL` names `inkwell_test`. Run `npx vitest run` from `client/` for component tests and `npx playwright test` from the repository root for end-to-end and automated accessibility checks. See the [Lecture 12 search test cases](LECTURE-12-SEARCH-TEST-CASES.md) for the search test design.

@@ -7,6 +7,9 @@ const mockUserRepository = {
 const mockTokenService = {
   issueTokens: jest.fn(),
 };
+const mockLogger = {
+  warn: jest.fn(),
+};
 
 jest.unstable_mockModule('../../repositories/user.repository.js', () => ({
   default: function MockUserRepository() {
@@ -18,10 +21,14 @@ jest.unstable_mockModule('../token.service.js', () => ({
     return mockTokenService;
   },
 }));
+jest.unstable_mockModule('../../lib/logger.js', () => ({
+  logger: mockLogger,
+}));
 
 const {
   AuthService,
   EmailAlreadyRegisteredError,
+  InvalidCredentialsError,
   WeakPasswordError,
   ValidationError,
 } = await import('../auth.service.js');
@@ -115,5 +122,20 @@ describe('AuthService.register', () => {
 
     await expect(service.register(input)).rejects.toBe(repositoryError);
     expect(mockTokenService.issueTokens).not.toHaveBeenCalled();
+  });
+
+  test('logs failed login with safe structured metadata', async () => {
+    mockUserRepository.findByEmail.mockResolvedValue(null);
+
+    await expect(service.login({
+      email: '  MISSING@example.com ',
+      password: 'secret-password',
+    })).rejects.toBeInstanceOf(InvalidCredentialsError);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      { event: 'auth.login.failed', email: 'missing@example.com' },
+      'Failed login attempt',
+    );
+    expect(JSON.stringify(mockLogger.warn.mock.calls)).not.toContain('secret-password');
   });
 });

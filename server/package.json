@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch --env-file=.env src/index.js",
-    "test": "node --experimental-vm-modules --env-file=.env.test node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules --env-file=.env.test node_modules/jest/bin/jest.js --runInBand"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -19,6 +19,7 @@
     "express": "^4.21.2",
     "express-rate-limit": "^8.7.2",
     "jsonwebtoken": "^9.0.2",
+    "pino": "^10.4.0",
     "prisma": "^7.10.0"
   },
   "devDependencies": {

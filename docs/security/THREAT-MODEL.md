@@ -22,7 +22,7 @@ certification.
 | `POST /api/posts` | Spoofing | Low | High | Low | Already present before this pass: bearer access tokens are verified, the token subject is resolved to a current user, and the route overwrites any client-supplied `authorId`. A regression test verifies Alice cannot publish as Bob. |
 | `GET /api/posts` and search | Information Disclosure | Low | Medium | Low | Feed and search select and serialize only the public author `id` and `displayName`. Email and persistence-only fields are not returned. |
 | `POST /api/auth/register` and `POST /api/auth/login` | Denial of Service / Spoofing | Medium | High | Medium | An IP-based limiter allows five requests per 10-minute window across authentication routes and returns `TOO_MANY_ATTEMPTS` thereafter. It reduces brute-force and request-flood risk but is not a distributed abuse defense. |
-| JWT access tokens | Spoofing / Elevation of Privilege | Low | High | Low | Tokens are signature- and expiry-verified server-side. Missing, malformed, invalid, expired, or orphaned-user tokens are rejected with HTTP 401. Development secret defaults must not be used in production. |
+| JWT access tokens | Spoofing / Elevation of Privilege | Low | High | Low | Tokens are signature- and expiry-verified server-side. Missing, malformed, invalid, expired, or orphaned-user tokens are rejected with HTTP 401. Startup now requires different environment secrets of at least 32 bytes; no fallback secret is used. |
 | `PostCard` rendering post body | Tampering / Elevation of Privilege (stored XSS) | Low | High | Low | Post body is rendered as React text, not HTML. A regression test verifies a script payload remains literal text and does not execute. |
 | `GET /api/posts` and search pagination | Denial of Service | Low | Medium | Low | `pageSize` defaults to 10, rejects malformed or non-positive values, and clamps requests to a maximum of 100 for both feed and search. |
 | Server dependency tree | Tampering / Denial of Service | Unknown | High | High | `npm audit --omit=dev` reports 13 production-tree advisories (5 moderate, 6 high, 2 critical). Reachability and exploitability were not assessed; compatible dependency updates remain a follow-up before production use. |
@@ -39,10 +39,19 @@ certification.
   no HTML sanitizer was needed because the app does not render post bodies as HTML.
 - Added a `pageSize` maximum of 100, with input validation and feed/search
   integration coverage.
-- Reviewed the production dependency audit summary. Dependency advisories were
-  not upgraded in this scoped pass; they are recorded as a separate follow-up.
+- Added authenticated post deletion with owner-only authorization and a
+  regression test confirming tagged-post cascade deletion.
+- Removed JWT secret fallbacks; server startup now requires different
+  environment-provided secrets of at least 32 bytes.
+- Added centralized error handling that logs server-side details while keeping
+  unexpected error details out of API responses.
+- Added structured Pino logging for failed-login events without logging
+  passwords or tokens.
+- Reviewed the production dependency audit summary; safe compatible updates
+  were applied, and remaining advisories are documented in the Workshop 16
+  OWASP review.
 
-## Security Measurement Baseline
+## Security Measurement Baseline — Workshop 15 (2026-10-26)
 
 - Confirmed application-level hardening gap: 1 (authentication endpoints had no
   rate limit).
