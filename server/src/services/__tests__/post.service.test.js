@@ -77,7 +77,12 @@ describe('PostService.publish', () => {
 describe('PostService.search', () => {
   test('returns matching posts for a normal query (S1)', async () => {
     const result = {
-      posts: [{ id: 'p1', title: 'Modularity', status: 'PUBLISHED' }],
+      posts: [{
+        id: 'p1',
+        title: 'Modularity',
+        status: 'PUBLISHED',
+        author: { id: 'u1', displayName: 'Writer' },
+      }],
       hasMore: false,
     };
     mockSearchStrategy.search.mockResolvedValue(result);
@@ -92,7 +97,10 @@ describe('PostService.search', () => {
   });
 
   test('defaults to page 1 and pageSize 10 (S2)', async () => {
-    const result = { posts: [{ id: 'p2', title: 'Design' }], hasMore: false };
+    const result = {
+      posts: [{ id: 'p2', title: 'Design', author: { id: 'u2', displayName: 'Reader' } }],
+      hasMore: false,
+    };
     mockSearchStrategy.search.mockResolvedValue(result);
 
     await expect(service.search({ query: 'design' })).resolves.toEqual(result);
@@ -104,7 +112,14 @@ describe('PostService.search', () => {
   });
 
   test('forwards explicit pagination and preserves hasMore (S3)', async () => {
-    const result = { posts: [{ id: 'p3', title: 'Design patterns' }], hasMore: true };
+    const result = {
+      posts: [{
+        id: 'p3',
+        title: 'Design patterns',
+        author: { id: 'u3', displayName: 'Author' },
+      }],
+      hasMore: true,
+    };
     mockSearchStrategy.search.mockResolvedValue(result);
 
     await expect(service.search({ query: 'design', page: 2, pageSize: 5 }))

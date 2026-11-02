@@ -2,8 +2,19 @@ import PostRepository from '../repositories/post.repository.js';
 import { EventBus } from '../events/event-bus.js';
 import { assertNonEmpty } from '../utils/validation.js';
 import SubstringSearchStrategy from './search/substring-search.strategy.js';
+import { toPublicUser } from '../dto/user.dto.js';
 
 const searchStrategy = SubstringSearchStrategy;
+
+function shapePostAuthors(result) {
+  return {
+    ...result,
+    posts: result.posts.map(({ author, ...post }) => ({
+      ...post,
+      author: toPublicUser(author),
+    })),
+  };
+}
 
 export class PostService {
   constructor(postRepository = new PostRepository()) {
@@ -39,14 +50,15 @@ export class PostService {
 
   async listPublished({ page = 1, pageSize = 10 } = {}) {
     const result = await this.postRepository.findPublished({ page, pageSize });
-    return { ...result, page };
+    return { ...shapePostAuthors(result), page };
   }
 
   async search({ query, page = 1, pageSize = 10 } = {}) {
-    return searchStrategy.search(query, {
+    const result = await searchStrategy.search(query, {
       page,
       pageSize,
     });
+    return shapePostAuthors(result);
   }
 }
 

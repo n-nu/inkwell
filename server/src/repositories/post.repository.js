@@ -66,7 +66,10 @@ export class PostRepository {
         { publishedAt: 'desc' },
         { id: 'desc' },
       ],
-      include: { tags: { include: { tag: true } } },
+      include: {
+        author: { select: { id: true, displayName: true } },
+        tags: { include: { tag: true } },
+      },
       skip: (page - 1) * pageSize,
       take: pageSize + 1,
     });
@@ -91,7 +94,10 @@ export class PostRepository {
         { publishedAt: 'desc' },
         { id: 'desc' },
       ],
-      include: { tags: { include: { tag: true } } },
+      include: {
+        author: { select: { id: true, displayName: true } },
+        tags: { include: { tag: true } },
+      },
       skip: (page - 1) * pageSize,
       take: pageSize + 1,
     });

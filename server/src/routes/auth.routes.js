@@ -4,6 +4,7 @@ import AuthService, {
   InvalidCredentialsError,
   WeakPasswordError,
 } from '../services/auth.service.js';
+import { authRateLimiter } from '../middleware/rate-limit.middleware.js';
 
 const router = express.Router();
 const authService = new AuthService();
@@ -21,7 +22,7 @@ function sendError(res, error) {
   return res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' } });
 }
 
-router.post('/auth/register', async (req, res) => {
+router.post('/auth/register', authRateLimiter, async (req, res) => {
   try {
     const result = await authService.register(req.body);
     return res.status(201).json(result);
@@ -30,7 +31,7 @@ router.post('/auth/register', async (req, res) => {
   }
 });
 
-router.post('/auth/login', async (req, res) => {
+router.post('/auth/login', authRateLimiter, async (req, res) => {
   try {
     const result = await authService.login(req.body);
     return res.status(200).json(result);

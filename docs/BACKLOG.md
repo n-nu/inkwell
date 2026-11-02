@@ -1,3 +1,7 @@
+For this assignment's preparation, I have utilized ChatGPT, a language model created by
+OpenAI. Within this assignment, ChatGPT was used for purposes such as outlining task
+requirements and compositing prompts for completion.
+
 # Inkwell Product Backlog
 
 Definition of Done: see README.md

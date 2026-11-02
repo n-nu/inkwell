@@ -104,7 +104,7 @@ Errors:
 
 A missing user and a wrong password both return `INVALID_CREDENTIALS`; the response must not reveal which value was incorrect or whether the email exists. If refresh-token issuance fails, the server must not issue an access token.
 
-## GET /api/posts?page=n
+## GET /api/posts?page=n&pageSize=n
 
 Returns a public page of published posts.
 
@@ -113,7 +113,10 @@ Authentication: not required.
 Query parameters:
 
 - `page`: optional positive integer; defaults to `1`.
-- The server uses a fixed page size defined by the service configuration.
+- `search`: optional substring matched against published post titles and bodies.
+- `pageSize`: optional positive integer; defaults to `10` and is clamped to a
+  maximum of `100`.
+- The same page-size behavior applies to `search` requests.
 
 Success: `200 OK`
 
@@ -123,6 +126,10 @@ Success: `200 OK`
     {
       "id": "post-id",
       "authorId": "user-id",
+      "author": {
+        "id": "user-id",
+        "displayName": "Reader"
+      },
       "title": "A published post",
       "body": "Plain-text post body.",
       "publishedAt": "2026-09-09T12:00:00.000Z",
@@ -140,12 +147,16 @@ Rules:
 - Order by `publishedAt` newest first, with a deterministic tie-breaker.
 - Return an explicit empty `posts` array when no posts exist.
 - Return an empty page with `200 OK` when `page` is beyond the available data.
+- Public author objects contain only `id` and `displayName`.
+- Reject malformed or non-positive `pageSize` values with `400`; clamp larger
+  values to `100`.
 
 Errors:
 
 | Status | Code | Message |
 |---|---|---|
 | 400 | `INVALID_PAGE` | `Page must be a positive integer.` |
+| 400 | `INVALID_PAGE_SIZE` | `Page size must be a positive integer.` |
 
 ## POST /api/posts/:id/comments
 

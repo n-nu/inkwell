@@ -23,7 +23,7 @@ critical user flows, and setup documentation.
 - End-to-end tests: critical user flows at mobile, tablet, and desktop viewports (Playwright) — ACTIVE (Lecture 14).
 - Automated accessibility checks (axe-core) — ACTIVE (Lecture 14); automated results supplement, but do not replace, manual accessibility review.
 - Documentation verification (README setup and test instructions) — ACTIVE (Lecture 14).
-- Security testing — starting Lecture 15.
+- Security testing — ACTIVE (Lecture 15): STRIDE threat model, authentication and identity checks, response shaping, rate limiting, stored-XSS regression, and bounded pagination.
 - Performance/load testing — deferred; revisit at Lecture 19–20.
 
 Run `npm test` from `server/`; it loads `server/.env.test` and requires the isolated `inkwell_test` database with migrations applied. The reset fixture refuses to delete records unless `DATABASE_URL` names `inkwell_test`. Run `npx vitest run` from `client/` for component tests and `npx playwright test` from the repository root for end-to-end and automated accessibility checks. See the [Lecture 12 search test cases](LECTURE-12-SEARCH-TEST-CASES.md) for the search test design.
