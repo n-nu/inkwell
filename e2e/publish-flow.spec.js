@@ -64,7 +64,8 @@ test.describe('responsive publishing flow', () => {
       await page.getByRole('button', { name: 'Log In' }).click();
       await expect(page).toHaveURL(`${appUrl}/`);
 
-      await page.getByRole('link', { name: 'Write' }).click();
+      await page.getByRole('navigation', { name: 'Main navigation' })
+        .getByRole('link', { name: 'Write', exact: true }).click();
       const body = `Published from the ${name} viewport.`;
       await page.getByLabel('Title').fill(title);
       await page.getByLabel('Body').fill(body);

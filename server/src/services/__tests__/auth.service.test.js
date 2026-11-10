@@ -139,3 +139,31 @@ describe('AuthService.register', () => {
     expect(JSON.stringify(mockLogger.warn.mock.calls)).not.toContain('secret-password');
   });
 });
+
+describe('AuthService.login bcrypt compatibility', () => {
+  const legacyPassword = 'workshop-18-compatibility';
+  // Generated with bcrypt 5.1.1 before upgrading to bcrypt 6.
+  const legacyHash = '$2b$10$C7HUksN7kFMVtqH2qNtOqeX6XZqo/wlPGu/RcqDynkmRxUKAL5A3y';
+
+  beforeEach(() => {
+    mockUserRepository.findByEmail.mockResolvedValue({
+      ...storedUser,
+      passwordHash: legacyHash,
+    });
+  });
+
+  test('authenticates an existing bcrypt 5 password hash without exposing it', async () => {
+    const result = await service.login({ email: input.email, password: legacyPassword });
+
+    expect(result.user.id).toBe(storedUser.id);
+    expect(result.user).not.toHaveProperty('passwordHash');
+    expect(result.accessToken).toBe('fake-access');
+    expect(result.refreshToken).toBe('fake-refresh');
+  });
+
+  test('rejects an incorrect password against an existing bcrypt 5 hash', async () => {
+    await expect(service.login({ email: input.email, password: 'incorrect-password' }))
+      .rejects.toBeInstanceOf(InvalidCredentialsError);
+    expect(mockTokenService.issueTokens).not.toHaveBeenCalled();
+  });
+});
