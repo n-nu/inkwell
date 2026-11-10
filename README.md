@@ -10,8 +10,73 @@ A Medium-like blog publishing platform built for CS 415/515: Software Design and
 
 ### Prerequisites
 
-- Node.js 22.12 or newer and npm
-- Docker Desktop (or Docker Engine) for PostgreSQL
+- Docker Desktop (or Docker Engine with Docker Compose) for the Docker-based server setup
+- Node.js 22.12 or newer and npm for the manual server and client setup
+
+### Run the server with Docker Compose
+
+If a root `.env` does not already exist, create one with two different random
+JWT secrets of at least 32 bytes. Generate each value separately with:
+
+```text
+node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"
+```
+
+Add them to the root `.env` file:
+
+```dotenv
+ACCESS_TOKEN_SECRET=<first-generated-value>
+REFRESH_TOKEN_SECRET=<different-generated-value>
+```
+
+Do not commit `.env`. Start the API server and PostgreSQL:
+
+```powershell
+docker compose up --build -d
+```
+
+The API is available at `http://localhost:3300`; PostgreSQL is exposed on host
+port `5434` and is reachable by the server over Compose networking at
+`db:5432`. The database is stored in the persistent `inkwell_db_data` volume.
+This Compose setup includes the API and PostgreSQL, not the React frontend.
+Host ports 3300 and 5434 avoid the existing local services; the container ports
+remain 3000 and 5432. The database credentials in Compose are for local course
+development only, not production deployments. The image retains Prisma CLI
+as a production dependency so the entrypoint can apply migrations before
+starting the non-root server.
+
+Verify API health:
+
+```powershell
+Invoke-RestMethod http://localhost:3300/api/health
+```
+
+For a database-backed check, register a user with a unique email using
+`POST http://localhost:3300/api/auth/register`; for example:
+
+```powershell
+$body = @{
+  email = "docker-test-$([guid]::NewGuid().ToString('N'))@example.com"
+  displayName = "Docker Test"
+  password = "correcthorse"
+} | ConvertTo-Json
+Invoke-RestMethod -Method Post `
+  -Uri http://localhost:3300/api/auth/register `
+  -ContentType application/json `
+  -Body $body
+```
+
+A successful registration returns HTTP 201 and confirms database connectivity.
+Stop the containers without deleting the database volume:
+
+```powershell
+docker compose down
+```
+
+### Manual setup
+
+The following instructions run the server and PostgreSQL directly for local
+development.
 
 ### Start PostgreSQL
 
@@ -126,12 +191,17 @@ npm.cmd run build
 Playwright end-to-end tests run from the repository root. They start the API
 and client automatically, and cover the login-to-publish flow at mobile,
 tablet, and desktop viewport sizes plus an automated axe-core accessibility
-check:
+check. Before running, set `$env:DATABASE_URL` to the isolated `inkwell_test`
+connection string from `server/.env.test`, not the persistent Compose database,
+and stop any manually started API on port 4000 so Playwright starts its own.
+The API inherits that database setting even though its development command
+also loads `server/.env`.
 
 ```powershell
 npm.cmd install
 npx.cmd playwright install chromium
 npx.cmd playwright test
+Remove-Item Env:DATABASE_URL
 ```
 
 The client uses port 5173 by default. If that port is already in use, set
