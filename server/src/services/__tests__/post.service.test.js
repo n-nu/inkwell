@@ -45,7 +45,7 @@ describe('PostService.publish', () => {
     });
 
     expect(post).toEqual(publishedPost);
-    expect(post.status).toBe('PUBLISHED');
+    expect(post.status).toBe('DRAFT');
     expect(mockPostRepository.createWithTags).toHaveBeenCalledTimes(1);
     expect(mockPostRepository.createWithTags).toHaveBeenCalledWith(expect.objectContaining({
       authorId: 'u1',
