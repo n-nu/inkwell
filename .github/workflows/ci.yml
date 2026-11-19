@@ -1,17 +1,186 @@
 name: CI
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
-  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   dependency-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 22
-      - run: npm audit --audit-level=high
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            server/package-lock.json
+            client/package-lock.json
+      - name: Audit server dependencies
+        run: npm audit --audit-level=high
         working-directory: server
+      - name: Audit client dependencies
+        run: npm audit --audit-level=high
+        working-directory: client
+
+  server-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: inkwell
+          POSTGRES_PASSWORD: inkwell
+          POSTGRES_DB: inkwell_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://inkwell:inkwell@localhost:5432/inkwell_test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - name: Install server dependencies
+        run: npm ci
+        working-directory: server
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        working-directory: server
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+        working-directory: server
+      - name: Prepare isolated test environment
+        run: |
+          echo "ACCESS_TOKEN_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          echo "REFRESH_TOKEN_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          touch .env.test
+        working-directory: server
+      - name: Run server tests with coverage
+        run: npm test -- --coverage
+        working-directory: server
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage-report
+          path: server/coverage/
+          if-no-files-found: error
+
+  client-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: client
+      - name: Run client tests
+        run: npx vitest run
+        working-directory: client
+      - name: Build client
+        run: npm run build
+        working-directory: client
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs:
+      - server-tests
+      - client-tests
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: inkwell
+          POSTGRES_PASSWORD: inkwell
+          POSTGRES_DB: inkwell_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://inkwell:inkwell@localhost:5432/inkwell_test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+            client/package-lock.json
+      - name: Install root dependencies
+        run: npm ci
+      - name: Install server dependencies
+        run: npm ci
+        working-directory: server
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: client
+      - name: Prepare isolated E2E environment
+        run: |
+          echo "ACCESS_TOKEN_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          echo "REFRESH_TOKEN_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          printf 'DATABASE_URL=%s\n' "$DATABASE_URL" > server/.env
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        working-directory: server
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+        working-directory: server
+      - name: Install Chromium and system dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright tests
+        run: npx playwright test --project=chromium
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+  prepare-deployment-artifact:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs:
+      - dependency-audit
+      - server-tests
+      - client-tests
+      - e2e-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish SHA-tagged image
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/inkwell-server:${GITHUB_SHA}"
+          docker build --tag "$image" ./server
+          docker push "$image"

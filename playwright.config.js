@@ -6,7 +6,10 @@ const clientUrl = `http://localhost:${clientPort}`;
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
-  reporter: 'list',
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+  ],
   use: {
     baseURL: clientUrl,
     trace: 'on-first-retry',
