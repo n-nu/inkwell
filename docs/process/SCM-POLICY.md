@@ -7,7 +7,7 @@ Inkwell uses GitHub Flow because its small project size and “one lecture, one 
 - `main` is always deployable.
 - Work happens on short-lived branches named `<type>/<short-description>`, such as `feature/tag-search` or `fix/author-id-spoofing`.
 - Changes merge through pull requests using the [pull request template](../../.github/PULL_REQUEST_TEMPLATE.md).
-- Pull requests require all automated tests to pass and approval from at least one reviewer.
+- Pull requests require all required status checks to pass. Required reviewer approvals are set to zero for this solo course project.
 - Delete branches after they are merged.
 
 ## Commit Message Conventions
@@ -32,3 +32,14 @@ Consistent prefixes make the history easier to search, for example with `git log
 ## Change Control
 
 Ordinary changes to unreleased work follow the standard pull-request process. Use the [Change Request template](../../.github/CHANGE_REQUEST_TEMPLATE.md) when changing software that has already been released and baselined. This risk-based control avoids imposing the formal process on every routine development change.
+
+## CI Enforcement (Lecture 20)
+
+`main` is protected by GitHub branch protection:
+
+- Required status checks: `dependency-audit`, `server-tests`, `client-tests`, `e2e-tests`, and `docker-build`.
+- Changes reach `main` through pull requests.
+- Branches must be up to date before merging.
+- Required checks must pass before merging.
+- Protection applies to administrators; force pushes and branch deletion are disabled.
+- Required reviewer approvals are set to 0 for this individual course project.
