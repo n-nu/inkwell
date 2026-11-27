@@ -28,4 +28,3 @@ export function setup() {
     throw new Error(`Warm-up failed with HTTP ${warmup.status}`);
   }
 }
-

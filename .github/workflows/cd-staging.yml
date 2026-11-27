@@ -79,4 +79,3 @@ jobs:
         env:
           BASE_URL: ${{ vars.STAGING_URL }}
         run: k6 run load-tests/feed.k6.js
-

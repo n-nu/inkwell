@@ -66,4 +66,3 @@ jobs:
         run: |
           curl -fsS --max-time 30 "${PRODUCTION_URL%/}/api/health"
           curl -fsS --max-time 30 "${PRODUCTION_URL%/}/api/posts?page=1"
-
