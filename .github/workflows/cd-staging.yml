@@ -1,0 +1,82 @@
+name: Deploy to Staging
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy-staging:
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+      STAGING_URL: ${{ vars.STAGING_URL }}
+      IMAGE_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate required staging configuration
+        run: |
+          test -n "$DEPLOY_HOOK"
+          test -n "$STAGING_URL"
+          test -n "$IMAGE_SHA"
+          echo "$IMAGE_SHA" | grep -Eq '^[0-9a-f]{40}$'
+          case "$STAGING_URL" in
+            http://*|https://*) ;;
+            *) exit 1 ;;
+          esac
+
+      - name: Verify CI-published image exists
+        run: |
+          IMAGE="ghcr.io/n-nu/inkwell-server:${IMAGE_SHA}"
+          docker manifest inspect "$IMAGE" >/dev/null
+
+      - name: Trigger Render staging deployment
+        env:
+          IMAGE_URL: ghcr.io/n-nu/inkwell-server:${{ github.event.workflow_run.head_sha }}
+        run: |
+          ENCODED_IMAGE=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$IMAGE_URL")
+          if [[ "$DEPLOY_HOOK" == *"?"* ]]; then
+            SEPARATOR="&"
+          else
+            SEPARATOR="?"
+          fi
+          curl -fsS --max-time 30 -X POST "${DEPLOY_HOOK}${SEPARATOR}imgURL=${ENCODED_IMAGE}" >/dev/null
+
+      - name: Wait for staging readiness
+        run: |
+          for attempt in $(seq 1 40); do
+            if curl -fsS --max-time 20 "${STAGING_URL%/}/api/health" >/dev/null; then
+              exit 0
+            fi
+            sleep 15
+          done
+          exit 1
+
+      - name: Run staging smoke tests
+        run: |
+          curl -fsS --max-time 30 "${STAGING_URL%/}/api/health"
+          curl -fsS --max-time 30 "${STAGING_URL%/}/api/posts?page=1"
+
+      - name: Install k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run informational staging load test
+        continue-on-error: true
+        env:
+          BASE_URL: ${{ vars.STAGING_URL }}
+        run: k6 run load-tests/feed.k6.js
+
