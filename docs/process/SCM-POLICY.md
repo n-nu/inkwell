@@ -43,3 +43,17 @@ Ordinary changes to unreleased work follow the standard pull-request process. Us
 - Required checks must pass before merging.
 - Protection applies to administrators; force pushes and branch deletion are disabled.
 - Required reviewer approvals are set to 0 for this individual course project.
+
+## Continuous Delivery (Lecture 21)
+
+- CI publishes a server Docker image once, tagged with the full Git SHA of the
+  successful `main` push.
+- Staging deployment is automatic after successful CI on `main`. It promotes
+  the exact CI image SHA and does not rebuild or recompile the application.
+- Production deployment is always manual and requires an explicit 40-character
+  SHA. It must be an SHA with a successful staging workflow run.
+- Staging and production use separate GitHub environment secrets for deployment
+  hooks. Repository variables hold their public URLs.
+- Staging smoke tests verify `/api/health` and `/api/posts?page=1`. The
+  informational k6 load test must not weaken those checks.
+- Scheduled uptime monitoring is read-only and runs hourly.

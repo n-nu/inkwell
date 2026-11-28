@@ -73,6 +73,54 @@ Stop the containers without deleting the database volume:
 docker compose down
 ```
 
+## Render deployment architecture
+
+The Render deployment configuration is defined in [`render.yaml`](render.yaml).
+It declares separate `inkwell-staging` and `inkwell-production` image-backed
+web services plus a shared `inkwell-db` PostgreSQL database. The initial
+Blueprint image is the verified SHA-tagged GHCR image
+`ghcr.io/n-nu/inkwell-server:5b1dd7952a1f196fcb89a99394cee3490819887d`.
+
+The Docker image is built and published once by the `CI` workflow after tests
+and audits pass. Deployments use that existing image; they do not rebuild the
+server or reinstall dependencies.
+
+- `Deploy to Staging` runs only after successful `CI` push runs on `main`, deploys
+  the CI run's full commit SHA, and smoke-tests `/api/health` and
+  `/api/posts?page=1`.
+- `Deploy to Production` is manual. It requires a full 40-character lowercase
+  SHA and a staging-successful workflow run for that SHA.
+- `Staging Uptime Check` tests staging once per hour and can also be run manually.
+
+Configure these external resources before the workflows can deploy:
+
+- A Render Blueprint with the `ghcr-read-packages` registry credential.
+- GitHub `staging` environment: `RENDER_DEPLOY_HOOK` and repository variable
+  `STAGING_URL`.
+- GitHub `production` environment: `RENDER_DEPLOY_HOOK` and repository variable
+  `PRODUCTION_URL`.
+- A separately hosted `inkwell-client` Render static site. Its API rewrite must
+  point `/api/*` to the actual staging URL; add `/*` to `/index.html` as the
+  second rewrite rule.
+
+Staging and production may share a PostgreSQL database, because free hosting
+availability may not provide isolated databases. Treat migrations as
+backward-compatible, and do not reset or destructively test the shared
+database. Free services may sleep and have cold starts. Staging and production
+deployments are also not data-isolated.
+
+To run the informational load test locally:
+
+```powershell
+k6 run -e BASE_URL=http://localhost:3300 load-tests/feed.k6.js
+```
+
+The stress script is staged-only and must not be run against production:
+
+```powershell
+k6 run -e BASE_URL=http://localhost:3300 load-tests/feed-stress.k6.js
+```
+
 ### Manual setup
 
 The following instructions run the server and PostgreSQL directly for local
